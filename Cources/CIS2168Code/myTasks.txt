@@ -1,0 +1,8 @@
+NAME # DESCRIPTION # DUEDATE
+Dinner # Meet with mom for Dinner at 7pm # 
+Biology Lab 1 # Finish the conclusion # 9/15/2013
+History HW2 # Add a reference date in the related works # 9/14/2013
+Car Maintenance # oil check # 9/25/2013
+Apartment # Sign in the new lease # 9/23/2013
+Pay the Water Bill # 35.70 # 9/30/2013
+New Phone # Check the new phones at the Apple Store # 

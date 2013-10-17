@@ -1,0 +1,46 @@
+Assignment 1 AllTopsorts
+We have discussed how to generate exactly one Topological Sort. 
+Here you are to write a recursive program, topsorts, that will 
+generate ALL the topological sorts. Use an array, out, to hold 
+the current topological sort. Be sure to run the program on a 
+number of examples and provide the input and all the outputs 
+for each of these examples. Include the special cases of all 
+permutations of 1, 2, . . . , n and all multiset permutations
+as mentioned in class.
+
+The following gives the exact structure of the recursive 
+topsorts program you MUST write: 
+
+topsorts()
+{
+   if (bag is not empty)
+   {
+
+      while (there is an object not taken out yet)
+      {
+
+         Take it out of the Bag, put it in the output array,
+         traverse its succ list, reduce the pred count for 
+         each successor, and if it goes to zero, put it in 
+         the Bag
+         topsorts();
+         Reverse the above
+
+      }
+   } 
+   else
+   {
+      Output the output array
+   }
+}
+
+Your program must have exactly this form, with topsorts having no parameters. 
+You are to have a count array (count[i] contains the # of predecessors of i), 
+a succ array (succ[j] is null or contains a pointer to the first item on the  
+successor list for j), and a bag. 
+The successor lists are to be simple linked lists with each list item 
+containing one successor and a pointer to the next list item. YOU decide on 
+the implementation for the bag. At no time should there be more than one count
+array, succ array, or bag.
+All operations on count, succ, or the bag are to be as efficient as possible 
+as discussed in class - your grade will depend on this!
