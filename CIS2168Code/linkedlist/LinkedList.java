@@ -14,7 +14,7 @@ package linkedlist;
  * 7) reverse()
  * 8) toString()
  */
-public class LinkedList {
+public class LinkedList implements ListInterface{
     
     Node head = null;
     Node p = null; //record the current node
@@ -25,7 +25,7 @@ public class LinkedList {
     }
     
 
-    boolean add(int num){
+    public boolean add(int num){
     /*
      * add a new value (and return true) if it is not already in the list, 
      * otherwise do nothing and return false
@@ -72,7 +72,9 @@ public class LinkedList {
     }
     
 
-    boolean search(int num){
+    
+
+    public    boolean search(int num){
      /*
      * search for a given value and return a Boolean to indicate if it is in the list
      */
@@ -94,7 +96,7 @@ public class LinkedList {
     }
 
 
-    boolean delete(int num){
+    public    boolean delete(int num){
     /*
      * delete a given value (and return true) if it is already in the list, 
      * otherwise do nothing and return false
@@ -124,7 +126,7 @@ public class LinkedList {
     
     
 
-    int removeFirst() throws MyException{
+     public  int removeFirst() throws MyException{
     /*
      * remove the first node and return its value if the list is not empty,
      * otherwise throw an exception
@@ -141,7 +143,7 @@ public class LinkedList {
     
     
     
-    int size(){
+     public   int size(){
     /*
     * report the current size of the list
     */
@@ -155,22 +157,24 @@ public class LinkedList {
         return l;
     }
     
-    void merge(LinkedList b){
+     public   void merge(ListInterface b){
     /*
      * merge this list with another one of the same class
      */
+        LinkedList tmp=(LinkedList)b;
+        tmp.printList();
         p = head;
-        b.p = b.head;
-        while(b.p!=null){
-            add(b.p.num);
-            b.p = b.p.next;
+        tmp.p = tmp.head;
+        while(tmp.p!=null){
+            add(tmp.p.num);
+            tmp.p = tmp.p.next;
         }
         
 //         System.out.println("Current head is: "+head.num);
         
     }
     
-    void reverse(){
+    public    void reverse(){
         /*
          * reverse the order of the values in the list
          */
@@ -207,7 +211,7 @@ public class LinkedList {
         return s;
     }
     
-    void printList(){
+    public   void printList(){
         p = head;
         if(p==null){
             System.out.println("It's empty");
@@ -223,4 +227,6 @@ public class LinkedList {
         }
         System.out.println();
     }
+    
+
 }

@@ -13,7 +13,9 @@ import java.util.Scanner;
 public class ListTest {
     
    public static void main(String args[]) throws MyException{
-       LinkedList list = new LinkedList();
+//       LinkedList list = new LinkedList();
+       ListInterface list = new LinkedList();
+       
 /*This part is to shwo that there will be an exception, if we try to remove
  * the first node from the empty list. 
  */
@@ -49,7 +51,7 @@ public class ListTest {
        list.printList();
                   
         queryExample("Wonna create another list by adding node with values 15, 3?");           
-        LinkedList list2 = new LinkedList();
+       ListInterface list2 = new LinkedList();
         list2.add(15);
         list2.add(3);
         System.out.print("New ");
