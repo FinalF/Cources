@@ -9,6 +9,7 @@
  *       Author:  Yufeng Wang 
  *       Email: Y.F.Wang@temple.edu
  *       Due: Oct 27 2013
+ *		 Compile:  gcc Comminucation_manager.c -o Comminucation_manager -lpthread
  * =====================================================================================
  */
 
@@ -21,15 +22,15 @@
 /*
 These are global
 */
-pthread_mutex_t lock_it = 	PTHREAD_MUTEX_INITIALIZER
-pthread_cond_t write_it = PTHREAD_COND_INITIALIZER
+pthread_mutex_t lock_it = 	PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t write_it = PTHREAD_COND_INITIALIZER;
 typedef enum {FALSE, TRUE } boolean;
 typedef struct{
-	string buffer[SIZE];
+	char buffer[SIZE];
 	int num;
 }BUFFER;
 BUFFER pool = {"",0};
-void *raed(void *), *write(void *);
+void *read(void *), *write(void *);
 boolean finish = FALSE;
 void main(){
 	pthread_t t_read, t_write;
@@ -46,7 +47,7 @@ Code to fill the buffer
 */
 void *read(void * junk){
 	int ch;
-	printf("R %2d: Starting\n, pthread_self()");
+	printf("R %2d: Starting\n", pthread_self());
 	while(!finish){
 		pthread_mutex_lock(&lock_it);
 		if(pool.num != SIZE){
@@ -61,7 +62,7 @@ void *read(void * junk){
 		}
 		pthread_mutex_unlock(&lock_it);
 	}
-	pringtf("R %2d: Exiting\n",pthread_self());
+	printf("R %2d: Exiting\n",pthread_self());
 	return NULL;
 }
 
@@ -77,7 +78,7 @@ void *write(void * junk){
 		while(pool.num != SIZE)
 			pthread_cond_wait(&write_it,&lock_it);
 		printf("W %2d: Writing buffer\n", pthread_self());
-		for(i=0;pool.buffer[i] && pool.buffer.num;++i,pool.num--)
+		for(i=0;pool.buffer[i] && pool.num;++i,pool.num--)
 			putchar(pool.buffer[i]);
 		pthread_mutex_unlock(&lock_it);
 	}
