@@ -22,11 +22,18 @@
 /*
 These are global
 */
-pthread_mutex_t lock_it = 	PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t lock_it = 	PTHREAD_MUTEX_INITIALIZER;	//lock for the monitor
 pthread_cond_t write_it = PTHREAD_COND_INITIALIZER;
+/* Condition variables for receive function for 4 threads*/
+pthread_cond_t rec_1 = PTHREAD_COND_INITIALIZER;	
+pthread_cond_t rec_2 = PTHREAD_COND_INITIALIZER;
+pthread_cond_t rec_3 = PTHREAD_COND_INITIALIZER;
+pthread_cond_t rec_4 = PTHREAD_COND_INITIALIZER;
+
+
 typedef enum {FALSE, TRUE } boolean;
 typedef struct{
-	char buffer[SIZE];
+	char *buffer[SIZE];
 	int num;
 }BUFFER;
 BUFFER pool = {"",0};
