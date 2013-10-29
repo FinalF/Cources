@@ -73,13 +73,22 @@ void *thread_operation(void *i){
        	ssize_t read;
 		char fileName[11];
 		sprintf(fileName, "%s%d%s", "thread", k, ".txt");
-        // printf("The file is %s", fileName);
 	  	fp = fopen(&fileName, "r");
-       while ((read = getline(&line, &len, fp)) != -1) {
-           // printf("Retrieved line of length %zu :\n", read);
-       		if(strncmp(line,"quit",4)==0)
-       			finish = TRUE;
-           printf("%s\n", line);
+       	while ((read = getline(&line, &len, fp)) != -1) {
+        	printf("%s\n", line);
+
+   			if(strncmp(line,"quit",4)==0){
+   			/*quit operation*/
+   				finish = TRUE;
+   			}else if(strncmp(line,"send",4)==0){
+   			/*send operation*/
+   			}else if(strncmp(line,"receive",7)==0){
+   			/*receive operation*/
+   			}else{
+			/*Error command file*/  	
+    		printf("Something wrong with the command file\n");			
+				finish = TRUE;
+   			}
        }
        // break;
 
