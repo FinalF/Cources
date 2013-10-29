@@ -40,32 +40,30 @@ typedef struct{
 BUFFER pool = {"",0};
 // void *read(void *), *write(void *);
 void *thread_operation(void *i); 
-boolean finish = FALSE;
+// boolean finish = FALSE;
+int messageCount[4]; //count total number of messages sent to each thread 
+
 void main(){
 	pthread_t thread[4];  //thread_1, thread_2, thread_3, thread_4;
 	int i;
 	for(i=0; i<4; i++)
 		pthread_create(&(thread[i]), NULL, &thread_operation, (void *) i);
 
-	// pthread_create(&t_read, NULL, read, (void *) NULL);
-	// pthread_create(&t_write, NULL, write, (void *) NULL);
-
-
-
-	// pthread_join(t_write,(void **) NULL);
-
 	for(i = 0;i < 4;i++){
 		pthread_join(thread[i],NULL);
 	}
 
 	pthread_mutex_destroy(&lock_it);
-	// pthread_cond_destroy(&write_it);
-
+	pthread_cond_destroy(&rec_1);
+	pthread_cond_destroy(&rec_2);
+	pthread_cond_destroy(&rec_3);
+	pthread_cond_destroy(&rec_4);	
 }
 
 
 
 void *thread_operation(void *i){
+	boolean finish = FALSE;
     int k = (int)i+1;
 	printf("\nThread %2d:  Starting\n",  k);
 	while(!finish){
@@ -79,9 +77,11 @@ void *thread_operation(void *i){
 	  	fp = fopen(&fileName, "r");
        while ((read = getline(&line, &len, fp)) != -1) {
            // printf("Retrieved line of length %zu :\n", read);
+       		if(strncmp(line,"quit",4)==0)
+       			finish = TRUE;
            printf("%s\n", line);
        }
-       break;
+       // break;
 
 	}
 	printf("Thread %2d: Exiting\n", k);
