@@ -40,8 +40,8 @@ typedef struct{
 BUFFER pool = {"",0};
 // void *read(void *), *write(void *);
 void *thread_operation(void *i); 
+char *buffer_reset(BUFFER pool);
 // boolean finish = FALSE;
-int messageCount[4]; //count total number of messages sent to each thread 
 
 void main(){
 	pthread_t thread[4];  //thread_1, thread_2, thread_3, thread_4;
@@ -82,11 +82,26 @@ void *thread_operation(void *i){
    				finish = TRUE;
    			}else if(strncmp(line,"send",4)==0){
    			/*send operation*/
+   				char *dst = (char*) malloc(sizeof(char));
+				strncpy(dst, line+5, 1);
+				int dstID = atoi(dst);
+	        	printf("\nThread %2d sending message to thread %d: ", k, dstID);
+	        	char * message = (char*) malloc((strlen(line)-7)*sizeof(char));
+				strncpy(message, line+7, (strlen(line)-7));
+	        	printf("%s\n", message);
+
+	        	pool.buffer[0] = "first";
+	        	pool.buffer[3] = "fourth";
+				showBuffer(pool.buffer);	
+	        	pool.buffer = buffer_reset(pool);
+				showBuffer(pool.buffer);
+
+
    			}else if(strncmp(line,"receive",7)==0){
    			/*receive operation*/
    			}else{
 			/*Error command file*/  	
-    		printf("Something wrong with the command file\n");			
+    			printf("Something wrong with the command file\n");			
 				finish = TRUE;
    			}
        }
@@ -97,7 +112,23 @@ void *thread_operation(void *i){
 	return NULL;
 }
 
+char *buffer_reset(BUFFER pool){
+	BUFFER tmp = {"",0};
+	int i;
+	for(i = 0; i < SIZE; i++){
+		if(pool.buffer[i] != 0){
+			tmp.buffer[i] = pool.buffer[i];
+		}
+	}
+	return tmp.buffer;
+}
 
+
+void showBuffer(char* buffer){
+	int i;
+	for(i = 0; i < SIZE; i++)
+		printf("%d: %s\n",i+1,buffer[i]);
+}
 /*
 Code to fill the buffer
 */
