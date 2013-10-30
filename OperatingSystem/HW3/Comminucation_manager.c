@@ -37,15 +37,18 @@ typedef enum {FALSE, TRUE } boolean;
 typedef struct{
 	char *buffer[SIZE];
 	int num ;
+	int exist[4];
 }BUFFER;
 BUFFER pool = {"",0};
+
 // void *read(void *), *write(void *);
 void *thread_operation(void *i); 
+BUFFER bufferInitial(BUFFER pool);
 BUFFER buffer_reset(BUFFER pool);
 BUFFER messageAdd(int ID,char * m, BUFFER  pool);
 void messageSent(int ID);
 void signalWait(int ID);
-BUFFER messageTake(int ID, BUFFER  pool);
+BUFFER messageTake( int ID, BUFFER  pool);
 int dstID(char * m);
 // boolean finish = FALSE;
 
@@ -53,6 +56,7 @@ void main(){
 
 	pthread_t thread[4];  //thread_1, thread_2, thread_3, thread_4;
 	int i;
+	pool = bufferInitial(pool);
 	for(i=0; i<4; i++)
 		pthread_create(&(thread[i]), NULL, &thread_operation, (void *) i);
 
@@ -71,8 +75,6 @@ void main(){
 
 void *thread_operation(void *i){
  	float d;
-    // d = (float)(rand() % 450000 + 50000);
-    // usleep(d);
 	boolean finish = FALSE;
     int k = (int)i+1;
 	printf("\nThread %2d:  Starting\n",  k);
@@ -85,7 +87,7 @@ void *thread_operation(void *i){
 		sprintf(fileName, "%s%d%s", "thread", k, ".txt");
 	  	fp = fopen(&fileName, "r");
        	while ((read = getline(&line, &len, fp)) != -1) {
-        	// printf("%s\n", line);
+        	//printf("command: %s, the length is %d\n", line, strlen(line));
    			if(strncmp(line,"quit",4)==0){
    			/*quit operation*/
    				finish = TRUE;
@@ -93,11 +95,15 @@ void *thread_operation(void *i){
    			/*send operation*/
 				pthread_mutex_lock(&lock_it);
 				/*In the case the buffer is full*/
-				while(pool.num == SIZE)
+				if(pool.num == SIZE){
+					printf("\nThe buffer is full, waiting");
 					pthread_cond_wait(&write_it,&lock_it);
+				}
 	        	/*put the message into the buffer*/
 				pool = messageAdd(k,line,pool);
+				pool.exist[k-1] = 1;
 				messageSent(dstID(line));
+				printf("\nSend notification to thread %d",dstID(line));
 				pthread_mutex_unlock(&lock_it);
 
    			}else if(strncmp(line,"receive",7)==0){
@@ -105,22 +111,27 @@ void *thread_operation(void *i){
 				pthread_mutex_lock(&lock_it);
 				/*In the case the buffer is empty*/
 				while(pool.num == 0)
-				/*wait for the message sent to me*/
 				signalWait(k);
+				/*wait for the message sent to me*/
 				pool = messageTake(k,pool);
+				printf("\nThe value of pool.exist is: %d",pool.exist[k-1]);
+				// showBuffer(pool.buffer);
+				if(pool.exist[k-1] ==  0){
+					printf("\nNo message for thread %d, waiting",k);
+					signalWait(k);
+				}
 				pthread_mutex_unlock(&lock_it);
-
    			}else{
 			/*Error command file*/  	
     			printf("Something wrong with the command file\n");			
 				finish = TRUE;
    			}
        }
-	/* Sleep random time (0.05~0.5s)*/
-	d = (float)(rand() % 450000 + 50000);
-	usleep(d);
+			/* Sleep random time (0.02~0.1s)*/
+			// d = (float)(rand() % 80000 + 20000);
+			// usleep(d);
 	}
-	printf("Thread %2d: Exiting\n", k);
+	printf("\nThread %2d: Exiting\n", k);
 	return NULL;
 }
 
@@ -161,49 +172,58 @@ int dstID(char * m){
 BUFFER messageTake(int ID, BUFFER  pool){
 /*find out the message belongs to me based on the content*/
 	int i ;
+	printf("\nThread %d is trying to receiving", ID);
 	for(i = 0; i < pool.num; i++){
-	char * line = malloc(strlen(pool.buffer[i]));
-	strncpy(line,pool.buffer[i],strlen(pool.buffer[i]));
-	char *dst = (char*) malloc(sizeof(char));
-	strncpy(dst, line+5, 1);
-	int dstID = atoi(dst);
-	if(dstID == ID){
-	char * message = (char*) malloc((strlen(line)-7)*sizeof(char));
-	strncpy(message, line+7, (strlen(line)-7));
-	/*If a send has been blocked because of full buffer, here release it*/
-	if(pool.num == SIZE){
-		pthread_cond_signal(&write_it);
+		char * line = malloc(strlen(pool.buffer[i]));
+		strncpy(line,pool.buffer[i],strlen(pool.buffer[i]));
+		char *dst = (char*) malloc(sizeof(char));
+		strncpy(dst, line+5, 1);
+		int dstID = atoi(dst);
+		printf("\nThe %d message is sent to %d", i+1,dstID);
+		if(ID == dstID){
+			pool.exist[ID-1] = 1;
+			// printf("\nThe value of pool.exist inside the func is: %d",pool.exist[ID-1]);
+			char * message = (char*) malloc((strlen(line)-7)*sizeof(char));
+			strncpy(message, line+7, (strlen(line)-7));
+			// /*Empty this slot*/
+			pool.buffer[i] = malloc(strlen("null"));
+			strcpy(pool.buffer[i], "null");
+			// /*Reset the buffer, guarantee FIFO*/
+			pool = buffer_reset(pool);
+			pool.num--;
+			// /*If a send has been blocked because of full buffer, here release it*/
+			if(pool.num == SIZE - 1){
+				pthread_cond_signal(&write_it);
+			}
+
+			printf("\nThread %d is receiving message: %s", ID, message);
+			printf("\nCurrent number of messages in the buffer: %d", pool.num);
+
+			// showBuffer(pool.buffer);
+			/*everytime only take one message*/
+			break;
+		}else{
+			pool.exist[ID-1] = 0;
+			// printf("\nNot found! The value of pool.exist inside the func is: %d",pool.exist[ID-1]);
+		}
 	}
-	pool.num--;
-	/*Empty this slot*/
-	pool.buffer[i] = malloc(strlen("null"));
-	strcpy(pool.buffer[i], "null");
-	/*Reset the buffer, guarantee FIFO*/
-	pool = buffer_reset(pool);
-	printf("\nThread %d is receiving message: %s.", ID, message);
-	printf("\nCurrent number of messages in the buffer: %d \n", pool.num);
-	/*everytime only take one message*/
-	break;
-	}else{
-		continue;
-	}
-}
+	// printf("\nThe value of pool.exist inside the func is: %d",pool.exist[ID-1]);
 	return pool;
 }
 
 
-BUFFER messageAdd(int ID,char * m, BUFFER  pool){
+BUFFER messageAdd(int ID, char * m, BUFFER  pool){
 	char *dst = (char*) malloc(sizeof(char));
 	strncpy(dst, m+5, 1);
 	int dstID = atoi(dst);
 	char * message = (char*) malloc((strlen(m)-7)*sizeof(char));
 	strncpy(message, m+7, (strlen(m)-7));
-	printf("Thread %d is trying to send to thread %d a message: %s.", ID, dstID,message);
+	printf("\nThread %d is trying to send to thread %d a message: %s", ID, dstID,message);
 /*put the whole message from the command file into the buffer*/
 	pool.buffer[pool.num] = malloc(strlen(m));
 	strncpy(pool.buffer[pool.num],m,strlen(m));
 	pool.num++;
-		printf("\nCurrent number of messages in the buffer: %d \n", pool.num);
+		printf("\nCurrent number of messages in the buffer: %d", pool.num);
 	return pool;
 }
 
@@ -211,6 +231,9 @@ BUFFER  buffer_reset(BUFFER  pool){
 	BUFFER  tmp = {"",0};
 	tmp.num = pool.num;
 	int i;
+	for(i=0;i<4;i++){
+		tmp.exist[i] = pool.exist[i];
+	}
 	int j = 0;
 	for(i = 0; i < SIZE; i++){
 		if(strncmp(pool.buffer[i],"null",4)!=0){
@@ -232,11 +255,18 @@ void showBuffer(char* buffer[SIZE]){
 	int i;
 	for(i = 0; i < SIZE; i++){
 		// if(strncmp(buffer[i],"null",4)!=0)
-			printf("The %d message: %s\n",i+1, buffer[i]);
+			printf("\nThe %d message: %s",i+1, buffer[i]);
 	}
 }
 
-
+BUFFER bufferInitial(BUFFER pool){
+	int i;
+	for(i = 0; i < SIZE; i++){
+			pool.buffer[i] = malloc(strlen("null"));
+			strncpy(pool.buffer[i],"null",strlen("null"));
+	}
+	return pool;
+}
 
 
 /*

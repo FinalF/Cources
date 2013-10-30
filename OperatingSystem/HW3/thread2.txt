@@ -1,5 +1,2 @@
 receive
-receive
-receive
-receive
 quit
