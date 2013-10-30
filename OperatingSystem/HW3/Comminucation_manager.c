@@ -23,8 +23,9 @@
 /*
 These are global
 */
+
 pthread_mutex_t lock_it = 	PTHREAD_MUTEX_INITIALIZER;	//lock for the monitor
-// pthread_cond_t write_it = PTHREAD_COND_INITIALIZER;
+pthread_cond_t write_it = PTHREAD_COND_INITIALIZER;	//condition variable for the buffer
 /* Condition variables for receive function for 4 threads*/
 pthread_cond_t rec_1 = PTHREAD_COND_INITIALIZER;	
 pthread_cond_t rec_2 = PTHREAD_COND_INITIALIZER;
@@ -35,12 +36,17 @@ pthread_cond_t rec_4 = PTHREAD_COND_INITIALIZER;
 typedef enum {FALSE, TRUE } boolean;
 typedef struct{
 	char *buffer[SIZE];
-	int num;
+	int num ;
 }BUFFER;
 BUFFER pool = {"",0};
 // void *read(void *), *write(void *);
 void *thread_operation(void *i); 
 BUFFER buffer_reset(BUFFER pool);
+BUFFER messageAdd(int ID,char * m, BUFFER  pool);
+void messageSent(int ID);
+void signalWait(int ID);
+BUFFER messageTake(int ID, BUFFER  pool);
+int dstID(char * m);
 // boolean finish = FALSE;
 
 void main(){
@@ -64,6 +70,9 @@ void main(){
 
 
 void *thread_operation(void *i){
+ 	float d;
+    // d = (float)(rand() % 450000 + 50000);
+    // usleep(d);
 	boolean finish = FALSE;
     int k = (int)i+1;
 	printf("\nThread %2d:  Starting\n",  k);
@@ -76,50 +85,126 @@ void *thread_operation(void *i){
 		sprintf(fileName, "%s%d%s", "thread", k, ".txt");
 	  	fp = fopen(&fileName, "r");
        	while ((read = getline(&line, &len, fp)) != -1) {
-        	printf("%s\n", line);
-
+        	// printf("%s\n", line);
    			if(strncmp(line,"quit",4)==0){
    			/*quit operation*/
    				finish = TRUE;
    			}else if(strncmp(line,"send",4)==0){
    			/*send operation*/
-   				char *dst = (char*) malloc(sizeof(char));
-				strncpy(dst, line+5, 1);
-				int dstID = atoi(dst);
-	        	printf("\nThread %2d sending message to thread %d: ", k, dstID);
-	        	char * message = (char*) malloc((strlen(line)-7)*sizeof(char));
-				strncpy(message, line+7, (strlen(line)-7));
-	        	printf("%s\n", message);
-
- 				pool.buffer[0] = malloc(strlen("first"));
-				strcpy(pool.buffer[0], "first");
-				pool.buffer[1] = malloc(strlen("null"));
-				strcpy(pool.buffer[1], "null");
-				pool.buffer[2] = malloc(strlen("null"));
-				strcpy(pool.buffer[2], "null");
- 				pool.buffer[3] = malloc(strlen("fourth"));
-				strcpy(pool.buffer[3], "fourth");
- 				pool.buffer[4] = malloc(strlen("fifth"));
-				strcpy(pool.buffer[4], "fifth");
-	        	// printf("The 3rd string: %s\n",pool.buffer[2]);
-				showBuffer(pool.buffer);	
-	        	pool = buffer_reset(pool);
-				showBuffer(pool.buffer);
-
+				pthread_mutex_lock(&lock_it);
+				/*In the case the buffer is full*/
+				while(pool.num == SIZE)
+					pthread_cond_wait(&write_it,&lock_it);
+	        	/*put the message into the buffer*/
+				pool = messageAdd(k,line,pool);
+				messageSent(dstID(line));
+				pthread_mutex_unlock(&lock_it);
 
    			}else if(strncmp(line,"receive",7)==0){
    			/*receive operation*/
+				pthread_mutex_lock(&lock_it);
+				/*In the case the buffer is empty*/
+				while(pool.num == 0)
+				/*wait for the message sent to me*/
+				signalWait(k);
+				pool = messageTake(k,pool);
+				pthread_mutex_unlock(&lock_it);
+
    			}else{
 			/*Error command file*/  	
     			printf("Something wrong with the command file\n");			
 				finish = TRUE;
    			}
        }
-       // break;
-
+	/* Sleep random time (0.05~0.5s)*/
+	d = (float)(rand() % 450000 + 50000);
+	usleep(d);
 	}
 	printf("Thread %2d: Exiting\n", k);
 	return NULL;
+}
+
+
+void signalWait(int ID){
+	if(ID==1){
+		pthread_cond_wait(&rec_1,&lock_it);
+	}else if(ID==2){
+		pthread_cond_wait(&rec_2,&lock_it);		
+	}else if(ID==3){
+		pthread_cond_wait(&rec_3,&lock_it);		
+	}else if(ID==4){
+		pthread_cond_wait(&rec_4,&lock_it);		
+	}
+
+}
+
+void messageSent(int ID){
+	if(ID==1){
+		pthread_cond_signal(&rec_1);
+	}else if(ID==2){
+		pthread_cond_signal(&rec_2);		
+	}else if(ID==3){
+		pthread_cond_signal(&rec_3);		
+	}else if(ID==4){
+		pthread_cond_signal(&rec_4);		
+	}
+
+}
+
+int dstID(char * m){
+	char *dst = (char*) malloc(sizeof(char));
+	strncpy(dst, m+5, 1);
+	int dstID = atoi(dst);
+	return dstID;
+}
+
+BUFFER messageTake(int ID, BUFFER  pool){
+/*find out the message belongs to me based on the content*/
+	int i ;
+	for(i = 0; i < pool.num; i++){
+	char * line = malloc(strlen(pool.buffer[i]));
+	strncpy(line,pool.buffer[i],strlen(pool.buffer[i]));
+	char *dst = (char*) malloc(sizeof(char));
+	strncpy(dst, line+5, 1);
+	int dstID = atoi(dst);
+	if(dstID == ID){
+	char * message = (char*) malloc((strlen(line)-7)*sizeof(char));
+	strncpy(message, line+7, (strlen(line)-7));
+	/*If a send has been blocked because of full buffer, here release it*/
+	if(pool.num == SIZE){
+		pthread_cond_signal(&write_it);
+	}
+	pool.num--;
+	/*Empty this slot*/
+	pool.buffer[i] = malloc(strlen("null"));
+	strcpy(pool.buffer[i], "null");
+	/*Reset the buffer, guarantee FIFO*/
+	pool = buffer_reset(pool);
+	printf("\nThread %d is receiving message: %s.", ID, message);
+	printf("\nCurrent number of messages in the buffer: %d \n", pool.num);
+	/*everytime only take one message*/
+	break;
+	}else{
+		continue;
+	}
+}
+	return pool;
+}
+
+
+BUFFER messageAdd(int ID,char * m, BUFFER  pool){
+	char *dst = (char*) malloc(sizeof(char));
+	strncpy(dst, m+5, 1);
+	int dstID = atoi(dst);
+	char * message = (char*) malloc((strlen(m)-7)*sizeof(char));
+	strncpy(message, m+7, (strlen(m)-7));
+	printf("Thread %d is trying to send to thread %d a message: %s.", ID, dstID,message);
+/*put the whole message from the command file into the buffer*/
+	pool.buffer[pool.num] = malloc(strlen(m));
+	strncpy(pool.buffer[pool.num],m,strlen(m));
+	pool.num++;
+		printf("\nCurrent number of messages in the buffer: %d \n", pool.num);
+	return pool;
 }
 
 BUFFER  buffer_reset(BUFFER  pool){
@@ -150,6 +235,10 @@ void showBuffer(char* buffer[SIZE]){
 			printf("The %d message: %s\n",i+1, buffer[i]);
 	}
 }
+
+
+
+
 /*
 Code to fill the buffer
 */
