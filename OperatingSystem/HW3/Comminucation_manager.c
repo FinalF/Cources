@@ -94,9 +94,10 @@ void *thread_operation(void *i){
    			}else if(strncmp(line,"send",4)==0){
    			/*send operation*/
 				pthread_mutex_lock(&lock_it);
+				printf("\n-----Thread %d enters monitor for sending-----",k);
 				/*In the case the buffer is full*/
 				if(pool.num == SIZE){
-					printf("\nThe buffer is full, waiting");
+					printf("\n-----Thread %d hangs because of full buffer-----",k);
 					pthread_cond_wait(&write_it,&lock_it);
 				}
 	        	/*put the message into the buffer*/
@@ -105,32 +106,36 @@ void *thread_operation(void *i){
 				messageSent(dstID(line));
 				printf("\nSend notification to thread %d",dstID(line));
 				pthread_mutex_unlock(&lock_it);
-
+				printf("\n-----Thread %d leaves monitor after sending-----",k);
    			}else if(strncmp(line,"receive",7)==0){
    			/*receive operation*/
 				pthread_mutex_lock(&lock_it);
+				printf("\n-----Thread %d enters monitor for receiving-----",k);
 				/*In the case the buffer is empty*/
-				if(pool.num == 0)
-				signalWait(k);
+				while(pool.num == 0){
+					printf("\n-----Thread %d hangs because of empty buffer-----",k);
+					signalWait(k);
+				}
 				/*wait for the message sent to me*/
 				pool = messageTake(k,pool);
 				// printf("\nThe value of pool.exist is: %d",pool.exist[k-1]);
 				// showBuffer(pool.buffer);
 				if(pool.exist[k-1] ==  0){
-					printf("\nNo message for thread %d, waiting",k);
+					printf("\n-----Thread %d waits because of no meesage for it-----",k);
 					signalWait(k);
 					pool = messageTake(k,pool);
 				}
 				pthread_mutex_unlock(&lock_it);
+				printf("\n-----Thread %d leaves monitor after receiving-----",k);
    			}else{
 			/*Error command file*/  	
     			printf("Something wrong with the command file\n");			
 				finish = TRUE;
-   			}
- 			/* Sleep random time (0.01~0.02s)*/
-			// d = (float)(rand() % 10000 + 10000);
-			// usleep(d);  			
+   			}			
        }
+			/* Sleep random time (0.001~0.002s)*/
+			d = (float)(rand() % 1000 + 1000);
+			usleep(d);  
 	// }
 	printf("\nThread %2d: Exiting\n", k);
 	return NULL;
@@ -192,19 +197,20 @@ BUFFER messageTake(int ID, BUFFER  pool){
 			// /*Reset the buffer, guarantee FIFO*/
 			pool = buffer_reset(pool);
 			pool.num--;
-			// /*If a send has been blocked because of full buffer, here release it*/
-			if(pool.num == SIZE - 1){
-				pthread_cond_signal(&write_it);
-			}
-			printf("\nThread %d is receiving message: %s", ID, message);
+
+			printf("\nThread %d receives message: %s", ID, message);
 			printf("\nCurrent number of messages in the buffer: %d", pool.num);
-			showBuffer(pool.buffer);
+			// showBuffer(pool.buffer);
 			/*everytime only take one message*/
 			break;
 		}else{
 			pool.exist[ID-1] = 0;
 			// printf("\nNot found! The value of pool.exist inside the func is: %d",pool.exist[ID-1]);
 		}
+	}
+	 /*If a send has been blocked because of full buffer, here release it*/
+	if(pool.num == SIZE - 1){
+		pthread_cond_signal(&write_it);
 	}
 	// printf("\nThe value of pool.exist inside the func is: %d",pool.exist[ID-1]);
 	return pool;
