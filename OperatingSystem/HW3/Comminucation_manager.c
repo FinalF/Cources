@@ -37,10 +37,10 @@ typedef struct{
 	char *buffer[SIZE];
 	int num;
 }BUFFER;
-BUFFER pool = {"",0};;
+BUFFER pool = {"",0};
 // void *read(void *), *write(void *);
 void *thread_operation(void *i); 
-void buffer_reset(BUFFER pool);
+BUFFER buffer_reset(BUFFER pool);
 // boolean finish = FALSE;
 
 void main(){
@@ -90,13 +90,6 @@ void *thread_operation(void *i){
 	        	char * message = (char*) malloc((strlen(line)-7)*sizeof(char));
 				strncpy(message, line+7, (strlen(line)-7));
 	        	printf("%s\n", message);
- 				
-
-				// pool->uffer[0] = "1st";
-				// pool->buffer[1] = "null";
-				// pool->buffer[2] = "null";
-				// pool->buffer[3] = "4th";
-				// pool->buffer[4] = "5th";
 
  				pool.buffer[0] = malloc(strlen("first"));
 				strcpy(pool.buffer[0], "first");
@@ -110,8 +103,8 @@ void *thread_operation(void *i){
 				strcpy(pool.buffer[4], "fifth");
 	        	// printf("The 3rd string: %s\n",pool.buffer[2]);
 				showBuffer(pool.buffer);	
-	        	// buffer_reset(pool);
-				// showBuffer(pool.buffer);
+	        	pool = buffer_reset(pool);
+				showBuffer(pool.buffer);
 
 
    			}else if(strncmp(line,"receive",7)==0){
@@ -129,8 +122,9 @@ void *thread_operation(void *i){
 	return NULL;
 }
 
-void buffer_reset(BUFFER  pool){
+BUFFER  buffer_reset(BUFFER  pool){
 	BUFFER  tmp = {"",0};
+	tmp.num = pool.num;
 	int i;
 	int j = 0;
 	for(i = 0; i < SIZE; i++){
@@ -145,13 +139,7 @@ void buffer_reset(BUFFER  pool){
 		strcpy(tmp.buffer[i], "null");
 	}
 
-	for(i = 0; i < SIZE; i++){
-			pool.buffer[i] = malloc(strlen(tmp.buffer[i]));
-			strncpy(pool.buffer[i],tmp.buffer[i],strlen(tmp.buffer[i]));
-	}
-
-	// showBuffer(tmp.buffer);
-	 // return tmp.buffer;
+	return tmp;
 }
 
 
