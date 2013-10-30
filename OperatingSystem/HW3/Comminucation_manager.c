@@ -18,6 +18,13 @@
 #include <ctype.h>
 #include <pthread.h>
 #include <string.h>
+// #include <time.h> 
+//  #include <sys/time.h>
+#include <unistd.h>
+
+
+
+
 #define SIZE 5
 
 /*
@@ -57,12 +64,16 @@ void main(){
 	pthread_t thread[4];  //thread_1, thread_2, thread_3, thread_4;
 	int i;
 	pool = bufferInitial(pool);
-	for(i=0; i<4; i++)
+	for(i=0; i<4; i++){
 		pthread_create(&(thread[i]), NULL, &thread_operation, (void *) i);
+	}
 
 	for(i = 0;i < 4;i++){
 		pthread_join(thread[i],NULL);
+		printf("\n+++++thread[%d] finishes, wait for others+++++",i+1);
 	}
+
+	printf("\n<<<<<All finished, exit!>>>>>\n");
 
 	pthread_mutex_destroy(&lock_it);
 	pthread_cond_destroy(&rec_1);
@@ -87,6 +98,11 @@ void *thread_operation(void *i){
 		sprintf(fileName, "%s%d%s", "thread", k, ".txt");
 	  	fp = fopen(&fileName, "r");
        	while ((!finish && (read = getline(&line, &len, fp)) != -1)) {
+			/* Sleep random time (0.1~1s)*/
+			d = (float)(rand() % 900000 + 100000);
+			// printf("sleep: %f\n", d);
+			usleep(d); 
+
         	//printf("command: %s, the length is %d\n", line, strlen(line));
    			if(strncmp(line,"quit",4)==0){
    			/*quit operation*/
@@ -111,11 +127,10 @@ void *thread_operation(void *i){
    			/*receive operation*/
 				pthread_mutex_lock(&lock_it);
 				printf("\n-----Thread %d enters monitor for receiving-----",k);
-
 				/*wait for the message sent to me*/
 				if(pool.counter[k-1] == 0){
-					signalWait(k);
 					printf("\n-----Thread %d waits because of no meesage for it-----",k);
+					signalWait(k);
 				}
 				pool = messageTake(k,pool);
 				pool.counter[k-1]--;
@@ -127,14 +142,9 @@ void *thread_operation(void *i){
     			printf("Something wrong with the command file\n");			
 				finish = TRUE;
    			}	
-			d = (float)(rand() % 400000 + 100000);
-			usleep(d); 
+
        }
-			/* Sleep random time (0.01~0.05s)*/
-			// d = (float)(rand() % 40000 + 10000);
-			// usleep(d); 		
-	// }
-	printf("\nThread %2d: Exiting\n", k);
+
 	return NULL;
 }
 
