@@ -78,7 +78,7 @@ void *thread_operation(void *i){
 	boolean finish = FALSE;
     int k = (int)i+1;
 	printf("\nThread %2d:  Starting\n",  k);
-	while(!finish){
+	// while(!finish){
 		FILE * fp;
        	char * line = NULL;
        	size_t len = 0;
@@ -86,7 +86,7 @@ void *thread_operation(void *i){
 		char fileName[11];
 		sprintf(fileName, "%s%d%s", "thread", k, ".txt");
 	  	fp = fopen(&fileName, "r");
-       	while ((read = getline(&line, &len, fp)) != -1) {
+       	while ((!finish && (read = getline(&line, &len, fp)) != -1)) {
         	//printf("command: %s, the length is %d\n", line, strlen(line));
    			if(strncmp(line,"quit",4)==0){
    			/*quit operation*/
@@ -110,15 +110,16 @@ void *thread_operation(void *i){
    			/*receive operation*/
 				pthread_mutex_lock(&lock_it);
 				/*In the case the buffer is empty*/
-				while(pool.num == 0)
+				if(pool.num == 0)
 				signalWait(k);
 				/*wait for the message sent to me*/
 				pool = messageTake(k,pool);
-				printf("\nThe value of pool.exist is: %d",pool.exist[k-1]);
+				// printf("\nThe value of pool.exist is: %d",pool.exist[k-1]);
 				// showBuffer(pool.buffer);
 				if(pool.exist[k-1] ==  0){
 					printf("\nNo message for thread %d, waiting",k);
 					signalWait(k);
+					pool = messageTake(k,pool);
 				}
 				pthread_mutex_unlock(&lock_it);
    			}else{
@@ -126,11 +127,11 @@ void *thread_operation(void *i){
     			printf("Something wrong with the command file\n");			
 				finish = TRUE;
    			}
+ 			/* Sleep random time (0.01~0.02s)*/
+			// d = (float)(rand() % 10000 + 10000);
+			// usleep(d);  			
        }
-			/* Sleep random time (0.02~0.1s)*/
-			// d = (float)(rand() % 80000 + 20000);
-			// usleep(d);
-	}
+	// }
 	printf("\nThread %2d: Exiting\n", k);
 	return NULL;
 }
@@ -179,7 +180,7 @@ BUFFER messageTake(int ID, BUFFER  pool){
 		char *dst = (char*) malloc(sizeof(char));
 		strncpy(dst, line+5, 1);
 		int dstID = atoi(dst);
-		printf("\nThe %d message is sent to %d", i+1,dstID);
+		// printf("\nThe %d message is sent to %d", i+1,dstID);
 		if(ID == dstID){
 			pool.exist[ID-1] = 1;
 			// printf("\nThe value of pool.exist inside the func is: %d",pool.exist[ID-1]);
@@ -195,11 +196,9 @@ BUFFER messageTake(int ID, BUFFER  pool){
 			if(pool.num == SIZE - 1){
 				pthread_cond_signal(&write_it);
 			}
-
 			printf("\nThread %d is receiving message: %s", ID, message);
 			printf("\nCurrent number of messages in the buffer: %d", pool.num);
-
-			// showBuffer(pool.buffer);
+			showBuffer(pool.buffer);
 			/*everytime only take one message*/
 			break;
 		}else{
@@ -267,48 +266,3 @@ BUFFER bufferInitial(BUFFER pool){
 	}
 	return pool;
 }
-
-
-/*
-Code to fill the buffer
-*/
-// void *read(void * junk){
-// 	int ch;
-// 	printf("R %2d: Starting\n", pthread_self());
-// 	while(!finish){
-// 		pthread_mutex_lock(&lock_it);
-// 		if(pool.num != SIZE){
-// 			ch = getc(stdin);
-// 			pool.buffer[pool.num++] = ch;
-// 			printf("R %2d: Got text [%c]\n", pthread_self(), isalnum(ch) ? ch : '#');
-// 			if(pool.num == SIZE){
-// 				printf("R %2d: Signaling full\n", pthread_self());
-// 				pthread_cond_signal(&write_it);
-// 			}
-
-// 		}
-// 		pthread_mutex_unlock(&lock_it);
-// 	}
-// 	printf("R %2d: Exiting\n",pthread_self());
-// 	return NULL;
-// }
-
-
-// Code to write buffer
-
-// void *write(void * junk){
-// 	int i;
-// 	printf("W %2d: Starting\n", pthread_self());
-// 	while(!finish){
-// 		pthread_mutex_lock(&lock_it);
-// 		printf("\nW %2d: Waiting\n", pthread_self());
-// 		while(pool.num != SIZE)
-// 			pthread_cond_wait(&write_it,&lock_it);
-// 		printf("W %2d: Writing buffer\n", pthread_self());
-// 		for(i=0;pool.buffer[i] && pool.num;++i,pool.num--)
-// 			printf("The result: %c\n" ,putchar(pool.buffer[i]));
-// 		pthread_mutex_unlock(&lock_it);
-// 	}
-// 	printf("W %2d: Exiting\n", pthread_self());
-// 	return NULL;
-// }
