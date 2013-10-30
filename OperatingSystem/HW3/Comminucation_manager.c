@@ -37,13 +37,14 @@ typedef struct{
 	char *buffer[SIZE];
 	int num;
 }BUFFER;
-BUFFER pool = {"",0};
+BUFFER pool = {"",0};;
 // void *read(void *), *write(void *);
 void *thread_operation(void *i); 
-char *buffer_reset(BUFFER pool);
+void buffer_reset(BUFFER pool);
 // boolean finish = FALSE;
 
 void main(){
+
 	pthread_t thread[4];  //thread_1, thread_2, thread_3, thread_4;
 	int i;
 	for(i=0; i<4; i++)
@@ -89,12 +90,28 @@ void *thread_operation(void *i){
 	        	char * message = (char*) malloc((strlen(line)-7)*sizeof(char));
 				strncpy(message, line+7, (strlen(line)-7));
 	        	printf("%s\n", message);
+ 				
 
-	        	pool.buffer[0] = "first";
-	        	pool.buffer[3] = "fourth";
+				// pool->uffer[0] = "1st";
+				// pool->buffer[1] = "null";
+				// pool->buffer[2] = "null";
+				// pool->buffer[3] = "4th";
+				// pool->buffer[4] = "5th";
+
+ 				pool.buffer[0] = malloc(strlen("first"));
+				strcpy(pool.buffer[0], "first");
+				pool.buffer[1] = malloc(strlen("null"));
+				strcpy(pool.buffer[1], "null");
+				pool.buffer[2] = malloc(strlen("null"));
+				strcpy(pool.buffer[2], "null");
+ 				pool.buffer[3] = malloc(strlen("fourth"));
+				strcpy(pool.buffer[3], "fourth");
+ 				pool.buffer[4] = malloc(strlen("fifth"));
+				strcpy(pool.buffer[4], "fifth");
+	        	// printf("The 3rd string: %s\n",pool.buffer[2]);
 				showBuffer(pool.buffer);	
-	        	pool.buffer = buffer_reset(pool);
-				showBuffer(pool.buffer);
+	        	// buffer_reset(pool);
+				// showBuffer(pool.buffer);
 
 
    			}else if(strncmp(line,"receive",7)==0){
@@ -112,22 +129,38 @@ void *thread_operation(void *i){
 	return NULL;
 }
 
-char *buffer_reset(BUFFER pool){
-	BUFFER tmp = {"",0};
+void buffer_reset(BUFFER  pool){
+	BUFFER  tmp = {"",0};
 	int i;
+	int j = 0;
 	for(i = 0; i < SIZE; i++){
-		if(pool.buffer[i] != 0){
-			tmp.buffer[i] = pool.buffer[i];
+		if(strncmp(pool.buffer[i],"null",4)!=0){
+			tmp.buffer[j] = malloc(strlen(pool.buffer[i]));
+			strncpy(tmp.buffer[j],pool.buffer[i],strlen(pool.buffer[i]));
+			j++;
 		}
 	}
-	return tmp.buffer;
+	for(i = j; i < SIZE; i++){
+		tmp.buffer[i] = malloc(strlen("null"));
+		strcpy(tmp.buffer[i], "null");
+	}
+
+	for(i = 0; i < SIZE; i++){
+			pool.buffer[i] = malloc(strlen(tmp.buffer[i]));
+			strncpy(pool.buffer[i],tmp.buffer[i],strlen(tmp.buffer[i]));
+	}
+
+	// showBuffer(tmp.buffer);
+	 // return tmp.buffer;
 }
 
 
-void showBuffer(char* buffer){
+void showBuffer(char* buffer[SIZE]){
 	int i;
-	for(i = 0; i < SIZE; i++)
-		printf("%d: %s\n",i+1,buffer[i]);
+	for(i = 0; i < SIZE; i++){
+		// if(strncmp(buffer[i],"null",4)!=0)
+			printf("The %d message: %s\n",i+1, buffer[i]);
+	}
 }
 /*
 Code to fill the buffer
