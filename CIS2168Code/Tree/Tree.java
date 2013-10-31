@@ -1,6 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Store the information of parenthesized arithmetic expression into the tree
+ * Also be able to calculate its value
  */
 
 /**
@@ -13,7 +13,7 @@ public class Tree {
     private static final String OPERATORS = "+-*/()";
     public static void main(String[] args) {
         String infix="(((3.2*25)-(4.3/2))+9.3)";
-        Stack<Node> stack = new Stack<Node>();
+       Stack<Node> stack = new Stack<Node>();
         StringBuilder number = new StringBuilder();
         StringTokenizer infixTokens = new StringTokenizer(infix, OPERATORS+" ", true);
 
@@ -23,13 +23,13 @@ public class Tree {
                 if (Character.isJavaIdentifierStart(firstChar)
                         || Character.isDigit(firstChar)) {
                            number.append(nextToken);
-        //		               number.append(' ');
-//                    System.out.println("It's a number "+number);
                     Node root = stack.peek();
                     if(root.getLeft()==null){
                         root.setLeft(new Node(number.toString()));
+                        root.getLeft().setData(toDouble(number.toString()));
                     }else{
-                        root.setRight(new Node(number.toString()));                       
+                        root.setRight(new Node(number.toString()));    
+                        root.getRight().setData(toDouble(number.toString())); 
                     }
                     number.setLength(0);
                        
@@ -50,7 +50,10 @@ public class Tree {
                     else if(firstChar==')'){
                         /*this is the end of a node*/
                         Node n = stack.pop();
+                        n.setData(cal(n.getLeft().getData(),n.getValue(),n.getRight().getData())); 
+//                        System.out.println("The value of this node: "+n.getData());
                         if(stack.isEmpty()){
+                            System.out.println("The value of the formula is: "+n.getData());
                             System.out.println("\nThe preorder traversal: ");
                             preorder(n);                            
                             System.out.println("\nThe inorder traversal: ");
@@ -62,20 +65,37 @@ public class Tree {
                     else{
                         Node n = stack.peek();
                         n.setValue(Character.toString(firstChar));
-//                        System.out.println("Set value as: "+n.getValue());
                     }
-//                  System.out.println("operator:"+firstChar);
                 }
          }	
 
 }
-	
-    private static boolean isOperator(char ch) {
-            return OPERATORS.indexOf(ch) != -1;
+
+static double cal(double a, String op,  double b){
+    double result = 0;
+    if(op.equals("+")){
+        result = a + b;
+    }else if(op.equals("-")){
+        result = a - b;
+    }else if(op.equals("*")){
+        result = a * b;
+    }else if(op.equals("/")){
+        result = a / b;
     }
+    return result;
+        
+}
+static double toDouble(String s){
+    return Double.valueOf(s);
+}
     
     
-public static void preorder(Node n){
+private static boolean isOperator(char ch) {
+        return OPERATORS.indexOf(ch) != -1;
+}
+    
+    
+static void preorder(Node n){
   if (n != null)
   {
    System.out.print(n.getValue()+ " ");
@@ -85,7 +105,7 @@ public static void preorder(Node n){
  }
     
     
-public static void inorder(Node n){
+static void inorder(Node n){
   if (n != null)
   {
    inorder(n.getLeft());
@@ -94,7 +114,7 @@ public static void inorder(Node n){
   }
  }
 
-public static void postorder(Node n){
+static void postorder(Node n){
   if (n != null)
   {
    inorder(n.getLeft());

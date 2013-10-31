@@ -5,9 +5,10 @@
  * @author wang
  */
 public class Node{
-    String s = null;
-    Node left = null;
-    Node right = null;
+    private String s = null;
+    private double data = 0;
+    private Node left = null;
+    private Node right = null;
     
     Node(){
         
@@ -17,26 +18,34 @@ public class Node{
         this.s = s;
     }
     
-    public void setLeft(Node n){
+    void setData(double a){
+        data = a;
+    }
+    
+    double getData(){
+        return data;
+    }
+    
+     void setLeft(Node n){
         this.left = n;
     }
     
-    public void setRight(Node n){
+     void setRight(Node n){
         this.right = n;
     }
     
-    public void setValue(String s){
+    void setValue(String s){
         this.s = s;
     }
-    public String getValue(){
+     String getValue(){
         return s;
     }
     
-    public Node getLeft(){
+     Node getLeft(){
         return left;
     }
     
-    public Node getRight(){
+     Node getRight(){
         return right;
     }
 }
