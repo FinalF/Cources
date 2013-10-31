@@ -1,5 +1,3 @@
-send-2-1st message to thread 2
-send-2-2nd message to thread 2
-send-2-3rd message to thread 2
 receive
+send-2-1stwo
 quit

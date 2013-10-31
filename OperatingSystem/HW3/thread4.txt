@@ -1,6 +1,6 @@
-send-1-1st message to thread 1
-send-1-2nd message to thread 1
-send-1-3rd message to thread 1
-send-2-1st message to thread 2
-send-3-1st message to thread 3
+send-1-1stone
+send-1-2ndone
+send-1-3rdone
+send-2-1stwo
+send-3-1sthree
 quit
