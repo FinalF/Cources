@@ -48,6 +48,8 @@ typedef struct{
 }BUFFER;
 BUFFER pool = {"",0};
 
+int hangUp[4] = {0,0,0,0};
+boolean deadLock = FALSE;
 // void *read(void *), *write(void *);
 void *thread_operation(void *i); 
 BUFFER bufferInitial(BUFFER pool);
@@ -57,6 +59,7 @@ void messageSent(int ID);
 void signalWait(int ID);
 BUFFER messageTake( int ID, BUFFER  pool);
 int dstID(char * m);
+boolean deadLockDetect(int a[4]);
 // boolean finish = FALSE;
 
 void main(){
@@ -66,12 +69,19 @@ void main(){
 	pool = bufferInitial(pool);
 	for(i=0; i<4; i++){
 		pthread_create(&(thread[i]), NULL, &thread_operation, (void *) i);
-	}
+	}	
+
+
 
 	for(i = 0;i < 4;i++){
 		pthread_join(thread[i],NULL);
-		printf("\n+++++thread[%d] finishes, wait for others+++++",i+1);
+		if(deadLock){
+			printf("\n------thread[%d] exits because of deadlock------",i+1);
+		}else{
+			printf("\n+++++thread[%d] finishes, wait for others+++++",i+1);
+		}
 	}
+
 
 	printf("\n<<<<<All finished, exit!>>>>>\n");
 
@@ -106,6 +116,7 @@ void *thread_operation(void *i){
         	//printf("command: %s, the length is %d\n", line, strlen(line));
    			if(strncmp(line,"quit",4)==0){
    			/*quit operation*/
+   				hangUp[k-1] = 1;
    				finish = TRUE;
    			}else if(strncmp(line,"send",4)==0){
    			/*send operation*/
@@ -114,8 +125,18 @@ void *thread_operation(void *i){
 				/*In the case the buffer is full*/
 				if(pool.num == SIZE){
 					printf("\n-----Thread %d hangs because of full buffer-----",k);
+					hangUp[k-1] = 1;
+					//printf("\nThe hanup: %d-%d-%d-%d",hangUp[0],hangUp[1],hangUp[2],hangUp[3]);
+					deadLock = deadLockDetect(hangUp);
+					if(deadLock){
+						printf("\n\n!!!!! Deadlock! All threads try to put message into currently full buffer!!!!!\n");
+						printf("\nProgram Terminates!\n");
+						finish = TRUE;
+						exit(1);
+					}
 					pthread_cond_wait(&write_it,&lock_it);
 				}
+				hangUp[k-1] = 0;
 	        	/*put the message into the buffer*/
 				pool = messageAdd(k,line,pool);
 				messageSent(dstID(line));
@@ -130,8 +151,17 @@ void *thread_operation(void *i){
 				/*wait for the message sent to me*/
 				if(pool.counter[k-1] == 0){
 					printf("\n-----Thread %d waits because of no meesage for it-----",k);
+					hangUp[k-1] = 1;
+					deadLock = deadLockDetect(hangUp);
+					if(deadLock){
+						printf("\n\n!!!!! Deadlock! Buffer is occupied by messages that no one needs!!!!!\n ");
+						printf("\nProgram Terminates!\n");
+						finish = TRUE;	
+						exit(1);
+					}
 					signalWait(k);
 				}
+				hangUp[k-1] = 0;
 				pool = messageTake(k,pool);
 				pool.counter[k-1]--;
 
@@ -273,4 +303,14 @@ BUFFER bufferInitial(BUFFER pool){
 		strncpy(pool.buffer[i],"null",strlen("null"));
 	}
 	return pool;
+}
+
+boolean deadLockDetect(int a[4]){
+	int i;
+	boolean deadlock = TRUE;
+	for(i=0;i<4;i++){
+		if(a[i]==0)
+			deadlock=FALSE;
+	}
+	return deadlock;
 }

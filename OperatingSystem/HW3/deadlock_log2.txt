@@ -1,0 +1,27 @@
+wang@wang-Vostro-1540:~/Desktop/Github/Cources/OperatingSystem/HW3$ ./Comminucation_manager 
+
+Thread  1:  Starting
+
+Thread  2:  Starting
+
+Thread  3:  Starting
+
+Thread  4:  Starting
+
+-----Thread 3 enters monitor for receiving-----
+-----Thread 3 waits because of no meesage for it-----
+The deadlock is 0 (true: 1, false: 0)
+-----Thread 2 enters monitor for receiving-----
+-----Thread 2 waits because of no meesage for it-----
+The deadlock is 0 (true: 1, false: 0)
+-----Thread 4 enters monitor for receiving-----
+-----Thread 4 waits because of no meesage for it-----
+The deadlock is 0 (true: 1, false: 0)
+-----Thread 1 enters monitor for receiving-----
+-----Thread 1 waits because of no meesage for it-----
+The deadlock is 1 (true: 1, false: 0)
+
+!!!!! Deadlock! Buffer is occupied by messages that no one needs!!!!!
+ 
+Program Terminates!
+

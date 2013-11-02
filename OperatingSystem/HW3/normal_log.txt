@@ -1,0 +1,130 @@
+wang@wang-Vostro-1540:~/Desktop/Github/Cources/OperatingSystem/HW3$ ./Comminucation_manager 
+
+Thread  1:  Starting
+
+Thread  2:  Starting
+
+Thread  3:  Starting
+
+Thread  4:  Starting
+
+-----Thread 4 enters monitor for sending-----
+Thread 4 is trying to send to thread 1 a message: 1st message to one from four
+
+Current number of messages in the buffer: 1
+Send notification to thread 1
+-----Thread 4 leaves monitor after sending-----
+-----Thread 3 enters monitor for receiving-----
+-----Thread 3 waits because of no meesage for it-----
+The deadlock is 0 (true: 1, false: 0)
+-----Thread 4 enters monitor for sending-----
+Thread 4 is trying to send to thread 1 a message: 2nd message to one from four
+
+Current number of messages in the buffer: 2
+Send notification to thread 1
+-----Thread 4 leaves monitor after sending-----
+-----Thread 1 enters monitor for receiving-----
+Thread 1 is trying to receiving
+Thread 1 receives message: 1st message to one from four
+
+Current number of messages in the buffer: 1
+-----Thread 1 leaves monitor after receiving-----
+-----Thread 2 enters monitor for receiving-----
+-----Thread 2 waits because of no meesage for it-----
+The deadlock is 0 (true: 1, false: 0)
+-----Thread 4 enters monitor for sending-----
+Thread 4 is trying to send to thread 1 a message: 3rd message to one from four
+
+Current number of messages in the buffer: 2
+Send notification to thread 1
+-----Thread 4 leaves monitor after sending-----
+-----Thread 4 enters monitor for sending-----
+Thread 4 is trying to send to thread 2 a message: 1st message to two from four
+
+Current number of messages in the buffer: 3
+Send notification to thread 2
+-----Thread 4 leaves monitor after sending-----
+Thread 2 is trying to receiving
+Thread 2 receives message: 1st message to two from four
+
+Current number of messages in the buffer: 2
+-----Thread 2 leaves monitor after receiving-----
+-----Thread 1 enters monitor for receiving-----
+Thread 1 is trying to receiving
+Thread 1 receives message: 2nd message to one from four
+
+Current number of messages in the buffer: 1
+-----Thread 1 leaves monitor after receiving-----
+-----Thread 1 enters monitor for receiving-----
+Thread 1 is trying to receiving
+Thread 1 receives message: 3rd message to one from four
+
+Current number of messages in the buffer: 0
+-----Thread 1 leaves monitor after receiving-----
+-----Thread 4 enters monitor for sending-----
+Thread 4 is trying to send to thread 3 a message: 1st message to three from four
+
+Current number of messages in the buffer: 1
+Send notification to thread 3
+-----Thread 4 leaves monitor after sending-----
+Thread 3 is trying to receiving
+Thread 3 receives message: 1st message to three from four
+
+Current number of messages in the buffer: 0
+-----Thread 3 leaves monitor after receiving-----
+-----Thread 2 enters monitor for receiving-----
+-----Thread 2 waits because of no meesage for it-----
+The deadlock is 0 (true: 1, false: 0)
+-----Thread 3 enters monitor for sending-----
+Thread 3 is trying to send to thread 2 a message: 1st message to two from three
+
+Current number of messages in the buffer: 1
+Send notification to thread 2
+-----Thread 3 leaves monitor after sending-----
+Thread 2 is trying to receiving
+Thread 2 receives message: 1st message to two from three
+
+Current number of messages in the buffer: 0
+-----Thread 2 leaves monitor after receiving-----
+-----Thread 2 enters monitor for sending-----
+Thread 2 is trying to send to thread 1 a message: 1st message to one from two
+
+Current number of messages in the buffer: 1
+Send notification to thread 1
+-----Thread 2 leaves monitor after sending-----
+-----Thread 1 enters monitor for sending-----
+Thread 1 is trying to send to thread 2 a message: 1st message to two from one
+
+Current number of messages in the buffer: 2
+Send notification to thread 2
+-----Thread 1 leaves monitor after sending-----
+-----Thread 1 enters monitor for receiving-----
+Thread 1 is trying to receiving
+Thread 1 receives message: 1st message to one from two
+
+Current number of messages in the buffer: 1
+-----Thread 1 leaves monitor after receiving-----
+-----Thread 2 enters monitor for sending-----
+Thread 2 is trying to send to thread 1 a message: 2nd message to one from two
+
+Current number of messages in the buffer: 2
+Send notification to thread 1
+-----Thread 2 leaves monitor after sending-----
+-----Thread 2 enters monitor for receiving-----
+Thread 2 is trying to receiving
+Thread 2 receives message: 1st message to two from one
+
+Current number of messages in the buffer: 1
+-----Thread 2 leaves monitor after receiving-----
+-----Thread 1 enters monitor for receiving-----
+Thread 1 is trying to receiving
+Thread 1 receives message: 2nd message to one from two
+
+Current number of messages in the buffer: 0
+-----Thread 1 leaves monitor after receiving-----
++++++thread[1] finishes, wait for others+++++
++++++thread[2] finishes, wait for others+++++
++++++thread[3] finishes, wait for others+++++
++++++thread[4] finishes, wait for others+++++
+<<<<<All finished, exit!>>>>>
+
