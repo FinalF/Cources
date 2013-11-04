@@ -1,11 +1,8 @@
-/*
- * Store the information of parenthesized arithmetic expression into the tree
- * Also be able to calculate its value
- */
+
 
 /**
- *
- * @author wang
+ * 914978493
+ * yanling chen
  */
 import java.util.Stack;
 import java.util.StringTokenizer;
@@ -13,7 +10,8 @@ public class Tree {
     private static final String OPERATORS = "+-*/()";
     public static void main(String[] args) {
         String infix="(((3.2*25)-(4.3/2))+9.3)";
-       Stack<Node> stack = new Stack<Node>();
+        System.out.println("The expression we are processing: (((3.2*25)-(4.3/2))+9.3)\n-------");
+        Stack<Node> stack = new Stack<Node>();
         StringBuilder number = new StringBuilder();
         StringTokenizer infixTokens = new StringTokenizer(infix, OPERATORS+" ", true);
 
@@ -51,15 +49,22 @@ public class Tree {
                         /*this is the end of a node*/
                         Node n = stack.pop();
                         n.setData(cal(n.getLeft().getData(),n.getValue(),n.getRight().getData())); 
-//                        System.out.println("The value of this node: "+n.getData());
+                        System.out.println("Get one unit tree structure (Exp):"
+                                            +n.getLeft().getData()
+                                            +n.getValue()
+                                            +n.getRight().getData()
+                                            +" = "
+                                            +n.getData());
+                        //System.out.println("The value of this node: "+n.getData());
                         if(stack.isEmpty()){
-                            System.out.println("The value of the formula is: "+n.getData());
-                            System.out.println("\nThe preorder traversal: ");
+                            System.out.println("-------\nThe value of the formula is: "+n.getData());
+                            System.out.println("\n=======\nThe preorder traversal: ");
                             preorder(n);                            
                             System.out.println("\nThe inorder traversal: ");
                             inorder(n);
                             System.out.println("\nThe postorder traversal: ");
-                            postorder(n);                            
+                            postorder(n);  
+                            System.out.println("\n=======");     
                         }
                     }
                     else{
@@ -99,8 +104,8 @@ static void preorder(Node n){
   if (n != null)
   {
    System.out.print(n.getValue()+ " ");
-   inorder(n.getLeft());
-   inorder(n.getRight());
+   preorder(n.getLeft());
+   preorder(n.getRight());
   }
  }
     
@@ -117,8 +122,8 @@ static void inorder(Node n){
 static void postorder(Node n){
   if (n != null)
   {
-   inorder(n.getLeft());
-   inorder(n.getRight());
+   postorder(n.getLeft());
+   postorder(n.getRight());
    System.out.print(n.getValue()+ " ");
   }
  }
