@@ -1,0 +1,5 @@
+Character:	Huffman code
+b:		10
+c:		110
+a:		111
+.:		0
