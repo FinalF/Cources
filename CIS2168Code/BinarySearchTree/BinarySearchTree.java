@@ -32,7 +32,7 @@ public class BinarySearchTree {
 
     void delete(Node parent, Node root, Node oldNode){
         if(root == null){
-            System.out.println("The tree is empty");
+            System.out.println("The target item is not existed.");
         }else if(root.s.compareTo(oldNode.s) < 0) {   //root < old node
             delete(root,root.right, oldNode);
         }else if(root.s.compareTo(oldNode.s) > 0){
@@ -66,16 +66,20 @@ public class BinarySearchTree {
                      * of local root reference the left child*/
                         if(parent.left==root){
                             parent.left = root.left;
+                         
                         }else{
                             parent.right = root.left;
+               
                         }
+                           root.left.right=root.right;
                     }else{
                     /*Find the right most node in the right substree of left child
                      copy its dat into the local root's data and remove it by setting 
                      its parent to reference its left child*/   
-                    Node rightMostParent = findRightMostParent(root.left.right);
+                    Node rightMostParent = findRightMostParent(root.left);
                          root.s = rightMostParent.right.s;                         
                          rightMostParent.right = rightMostParent.right.left;
+//                          root.left.right=root.right;
                     }
                 }
         }
@@ -104,14 +108,14 @@ public class BinarySearchTree {
 
         if(root == null){
             for(int i = 1; i < depth; i++){
-                sb.append(" ");
+                sb.append("\t");
             }
             sb.append("\n");           
         }else{
 
             inOrderTraversal(root.left,depth+1,sb);
                 for(int i = 1; i < depth; i++){
-                    sb.append(" ");
+                    sb.append("\t");
                 }
             sb.append(root.s);
             sb.append("\n");
