@@ -20,7 +20,7 @@ public class PageRefGen {
 	 * t: probability that p moves to a new location; otherwise, p=p+1
 	 * 
 	 */
-	
+	private static int times = 100;
 	private static int P = 2000;
 	private static int m = 200;
 	private static int p = 100;
@@ -32,7 +32,8 @@ public class PageRefGen {
 		
 	}
 	
-	PageRefGen(int P, int m, int p, int e, int t, File f){
+	PageRefGen(int times, int P, int m, int p, int e, int t, File f){
+		PageRefGen.times = times;
 		PageRefGen.P = P;
 		PageRefGen.m = m;
 		PageRefGen.p = p;
@@ -47,11 +48,19 @@ public class PageRefGen {
 			out.flush();
 			int tmp = 0; //reference
 			
-			for(int i = 0; i < m; i ++){
-			tmp = p + (int)(Math.random() * (e + 1)); //generate a reference addressed [p,p+e]
-			out.println(tmp);
+			for(int j = 0; j < times; j ++){				
+				for(int i = 0; i < m; i ++){
+					tmp = p + (int)(Math.random() * (e + 1)); //generate a reference addressed [p,p+e]
+					out.println(tmp);
+				}
+				
+				if( (int)(Math.random() * (t + 1)) == 1) {
+				  //probability of 1/t 
+					p = (int)(Math.random() * P );
+				}else{
+					p += 1;
+			}			
 			}
-			
 			out.close();
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
