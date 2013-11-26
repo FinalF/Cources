@@ -32,6 +32,8 @@ public class PageRefGen {
 		
 	}
 	
+
+	
 	PageRefGen(int times, int P, int m, int p, int e, int t, File f){
 		PageRefGen.times = times;
 		PageRefGen.P = P;
@@ -42,7 +44,8 @@ public class PageRefGen {
 		PageRefGen.f = f;
 	}
 	
-	static void generate(){
+	static void generate(int P){
+		PageRefGen.P = P;
 		try {
 			PrintWriter out = new PrintWriter(f);
 			out.flush();
@@ -50,13 +53,13 @@ public class PageRefGen {
 			
 			for(int j = 0; j < times; j ++){				
 				for(int i = 0; i < m; i ++){
-					tmp = p + (int)(Math.random() * (e + 1)); //generate a reference addressed [p,p+e]
+					tmp = p + (int)(Math.random() * e); //generate a reference addressed [p,p+e]
 					out.println(tmp);
 				}
 				
-				if( (int)(Math.random() * (t + 1)) == 1) {
+				if( (int)(Math.random() * t) == 1) {
 				  //probability of 1/t 
-					p = (int)(Math.random() * P );
+					p = (int)(Math.random() * (P-1-e) );
 				}else{
 					p += 1;
 			}			
@@ -68,6 +71,12 @@ public class PageRefGen {
 		}
 	}
 	
-
+	static File returnFile(){
+		return f;
+	}
+	
+	static int totalRef(){
+		return times*m;
+	}
 	
 }
