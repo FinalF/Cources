@@ -51,6 +51,8 @@ public class ReplacementCompare {
 			out.print(",");
 			out.print(WS.returnFaultRate()*100);
 			out.print(",");
+			out.print(WS.returnF());
+			out.print(",");
 			
 			OptimalPageReplaceAlg OPR = new OptimalPageReplaceAlg( P, i, new Scanner(PageRefGen.returnFile()));
 			OPR.PageFaultCalculation();
@@ -58,12 +60,16 @@ public class ReplacementCompare {
 			out.print(",");
 			out.print(OPR.returnFaultRate()*100);
 			out.print(",");
+			out.print(OPR.returnF());
+			out.print(",");
 			
 			PageFaultFrequencyAlg PFF = new PageFaultFrequencyAlg( P, i, new Scanner(PageRefGen.returnFile()));
 			PFF.PageFaultCalculation();
 			out.print(PFF.returnPageFault());
 			out.print(",");
-			out.println(PFF.returnFaultRate()*100);
+			out.print(PFF.returnFaultRate()*100);
+			out.print(",");
+			out.println(PFF.returnF());
 		}
 		out.close();
 		System.out.println("Finished!");
