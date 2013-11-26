@@ -16,7 +16,7 @@ public class PageFaultFrequencyAlg {
 	private Scanner in = null;
 	private int totalPage = 0;
 	private int pageFault = 0;
-
+	private int F;
 	
 	PageFaultFrequencyAlg(int P, int t,Scanner in){
 		this.P = P;
@@ -43,6 +43,7 @@ public class PageFaultFrequencyAlg {
 					VMreset();
 				}
 			totalPage++;
+			Fupdate();
 		}
 		
 	}
@@ -59,6 +60,20 @@ public class PageFaultFrequencyAlg {
 		for(int i = 0; i < VM.length; i++){
 			VM[i].u = 0;
 		}
+	}
+	
+	
+	void Fupdate(){
+		int f = 0;
+		for(int i = 0; i < VM.length; i++){
+			if(VM[i].res == 1)
+				f++;
+		}
+		F+=f; 
+	}
+	
+	double returnF(){
+		return Math.ceil((double) F/totalPage);
 	}
 	
 	int returnPageFault(){

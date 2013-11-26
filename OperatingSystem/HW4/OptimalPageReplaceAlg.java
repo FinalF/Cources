@@ -16,7 +16,7 @@ public class OptimalPageReplaceAlg {
 	private Scanner in = null;
 	private int totalPage = 0;
 	private int pageFault = 0;
-
+	private int F;
 	
 	OptimalPageReplaceAlg(int P, int t,Scanner in){
 		this.P = P;
@@ -39,6 +39,7 @@ public class OptimalPageReplaceAlg {
 						}
 					VMupdate();
 					VM[page] = 1;
+					Fupdate();
 				}
 		totalPage++;
 		}
@@ -50,6 +51,7 @@ public class OptimalPageReplaceAlg {
 			}
 		VMupdate();
 		VM[page] = 1;
+		Fupdate();
 		}
 		
 	}
@@ -63,6 +65,19 @@ public class OptimalPageReplaceAlg {
 		while(!tmp.isEmpty()){
 			VM[tmp.remove()] = 1;
 		}		
+	}
+	
+	void Fupdate(){
+		int f = 0;
+		for(int i = 0; i < VM.length; i++){
+			if(VM[i] == 1)
+				f++;
+		}
+		F+=f; 
+	}
+	
+	double returnF(){
+		return Math.ceil((double) F/totalPage);
 	}
 	
 	int returnPageFault(){
