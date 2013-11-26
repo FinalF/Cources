@@ -20,7 +20,7 @@ public class PageRefGen {
 	 * t: probability that p moves to a new location; otherwise, p=p+1
 	 * 
 	 */
-	private static int times = 100;
+	private static int times = 250;
 	private static int P = 2000;
 	private static int m = 200;
 	private static int p = 100;
